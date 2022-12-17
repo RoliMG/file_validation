@@ -20,9 +20,9 @@ def get_files(dir):
     return files
 
 
-dir1 = "W:/"
-dir2 = "X:/"
-log_dir = "W:/mismatch.txt"
+dir1 = "C:\\a"
+dir2 = "D:\\b"
+log_dir = "mismatch.txt"
 
 print(f"Getting files from {dir1}")
 files = get_files(dir1)
@@ -30,6 +30,7 @@ i = 0
 
 print("Comparing hashes")
 mismatch = 0
+os.remove("mismatch.txt")
 
 for f in files:
     if i % 100 == 0:
@@ -41,7 +42,7 @@ for f in files:
     if f_md5 != f2_md5:
         mismatch += 1
         with open(log_dir, "a") as log_f:
-            msg = f"Hash mismatch {dir2[0]}{f[1:]}"
+            msg = f"{dir2[0]}{f[1:]}\n"
             print(msg)
             log_f.write(msg)
 
