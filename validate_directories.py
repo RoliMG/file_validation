@@ -12,6 +12,11 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
+def read_bytes(fname):
+    with open(fname, "rb") as f:
+        return f.read()
+
+
 def get_files(dir):
     files = []
     for filename in glob.iglob(dir + '**/**', recursive=True):
@@ -44,9 +49,9 @@ for f in files:
     if i % 100 == 0:
         print(f"{i}/{len(files)}")
 
-    f_md5 = md5(f)
+    f_md5 = read_bytes(f)  # md5(f)
     other_file = dir2 + f[len(dir1):]
-    f2_md5 = md5(other_file)
+    f2_md5 = read_bytes(other_file)  # md5(other_file)
 
     if f_md5 != f2_md5:
         mismatch += 1
