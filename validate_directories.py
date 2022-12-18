@@ -12,9 +12,12 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-def read_bytes(fname):
-    with open(fname, "rb") as f:
-        return f.read()
+def files_equals(fname1, fname2, chunk_size=4096) -> bool:
+    with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
+        while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
+            if chunk1 != chunk2:
+                return False
+    return True
 
 
 def get_files(dir):
@@ -33,6 +36,7 @@ if len(args) != 3:
 
 dir1 = args[1]
 dir2 = args[2]
+
 log_dir = "mismatch.txt"
 
 print(f"Getting files from {dir1}")
@@ -49,11 +53,9 @@ for f in files:
     if i % 100 == 0:
         print(f"{i}/{len(files)}")
 
-    f_md5 = read_bytes(f)  # md5(f)
     other_file = dir2 + f[len(dir1):]
-    f2_md5 = read_bytes(other_file)  # md5(other_file)
 
-    if f_md5 != f2_md5:
+    if not files_equals(f, other_file):
         mismatch += 1
         with open(log_dir, "a") as log_f:
             msg = f"{dir2[0]}{f[1:]}\n"
