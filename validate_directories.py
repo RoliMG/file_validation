@@ -2,6 +2,38 @@ import glob
 import hashlib
 import os
 import sys
+import time
+
+
+def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iterable    - Required  : iterable object (Iterable)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    total = len(iterable)
+
+    # Progress Bar Printing Function
+    def printProgressBar(iteration):
+        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+        filledLength = int(length * iteration // total)
+        bar = fill * filledLength + '-' * (length - filledLength)
+        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
+
+    # Initial Call
+    printProgressBar(0)
+    # Update Progress Bar
+    for i, item in enumerate(iterable):
+        yield item
+        printProgressBar(i + 1)
+    # Print New Line on Complete
+    print()
 
 
 def md5(fname):
@@ -22,11 +54,14 @@ def files_equals(fname1, fname2, chunk_size=4096) -> bool:
 
 def get_files(dir):
     files = []
+    total_size = 0
+
     for filename in glob.iglob(dir + '**/**', recursive=True):
         if os.path.isfile(filename):
+            total_size += os.path.getsize(filename)
             files.append(filename)
 
-    return files
+    return files, total_size
 
 
 args = sys.argv
@@ -40,31 +75,26 @@ dir2 = args[2]
 log_dir = "mismatch.txt"
 
 print(f"Getting files from {dir1}")
-files = get_files(dir1)
+files, total_size = get_files(dir1)
 i = 0
 
-print("Comparing hashes")
-mismatch = 0
+print(f"Comparing {len(files)} files")
+mismatches = []
 
 if os.path.exists("mismatch.txt"):
     os.remove("mismatch.txt")
 
-for f in files:
-    if i % 100 == 0:
-        print(f"{i}/{len(files)}")
-
+for f in progressBar(files, prefix='Progress:', suffix='Complete', length=50, printEnd=""):
     other_file = dir2 + f[len(dir1):]
 
     if not files_equals(f, other_file):
-        mismatch += 1
+        mismatches.append(other_file)
         with open(log_dir, "a") as log_f:
-            msg = f"{dir2[0]}{f[1:]}\n"
-            print(msg)
-            log_f.write(msg)
+            # print(other_file)
+            log_f.write(other_file)
 
-    i += 1
-
-if mismatch == 0:
+if not mismatches:
     print("No mismatch found")
 else:
-    print(f"{mismatch} mismatches found")
+    print(f"{len(mismatches)} mismatches found:")
+    [print(mis) for mis in mismatches]
