@@ -50,7 +50,7 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-def files_equals(fname1, fname2, chunk_size=4096) -> bool:
+def file_equals(fname1, fname2, chunk_size=4096) -> bool:
     with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
         while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
             if chunk1 != chunk2:
@@ -84,7 +84,7 @@ print(f"Getting files from {dir1}")
 files, total_size = get_files(dir1)
 i = 0
 
-print(f"Comparing {len(files)} files")
+print(f"Comparing {len(files)} files ({total_size/1024**3}GB)")
 mismatches = []
 
 if os.path.exists("mismatch.txt"):
@@ -94,7 +94,7 @@ buffer = []
 for f in progressBar(files, prefix='Progress:', suffix='Complete', length=50, printEnd="", buffer=buffer):
     other_file = dir2 + f[len(dir1):]
 
-    if not files_equals(f, other_file):
+    if not file_equals(f, other_file):
         mismatches.append(other_file)
         with open(log_dir, "a") as log_f:
             buffer.append(other_file)
