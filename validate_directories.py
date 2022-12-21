@@ -5,7 +5,7 @@ import sys
 import time
 
 
-def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='â–ˆ', printEnd="\r"):
+def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='â–ˆ', printEnd="\r", buffer=None):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -17,6 +17,9 @@ def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='â–
         fill        - Optional  : bar fill character (Str)
         printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
+    if buffer is None:
+        buffer = []
+
     total = len(iterable)
 
     # Progress Bar Printing Function
@@ -24,7 +27,10 @@ def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='â–
         percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
         filledLength = int(length * iteration // total)
         bar = fill * filledLength + '-' * (length - filledLength)
+
+        [print(f"\r{b}\n", end=printEnd) for b in buffer]
         print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
+        buffer.clear()
 
     # Initial Call
     printProgressBar(0)
@@ -83,18 +89,18 @@ mismatches = []
 
 if os.path.exists("mismatch.txt"):
     os.remove("mismatch.txt")
+buffer = []
 
-for f in progressBar(files, prefix='Progress:', suffix='Complete', length=50, printEnd=""):
+for f in progressBar(files, prefix='Progress:', suffix='Complete', length=50, printEnd="", buffer=buffer):
     other_file = dir2 + f[len(dir1):]
 
     if not files_equals(f, other_file):
         mismatches.append(other_file)
         with open(log_dir, "a") as log_f:
-            # print(other_file)
+            buffer.append(other_file)
             log_f.write(other_file)
 
 if not mismatches:
     print("No mismatch found")
 else:
-    print(f"{len(mismatches)} mismatches found:")
-    [print(mis) for mis in mismatches]
+    print(f"{len(mismatches)} mismatches found")
