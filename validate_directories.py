@@ -6,7 +6,9 @@ import time
 
 import math
 
+suffix = "Complete"
 bytes_scanned = 0
+
 
 def convert_size(size_bytes):
     if size_bytes == 0:
@@ -18,7 +20,7 @@ def convert_size(size_bytes):
     return "%s %s" % (s, size_name[i])
 
 
-def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r", buffer=None):
+def progressBar(iterable, prefix='', decimals=1, length=100, fill='█', printEnd="\r", buffer=None):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -41,7 +43,7 @@ def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='�
         filledLength = int(length * iteration // total)
         bar = fill * filledLength + '-' * (length - filledLength)
 
-        [print(f"\r{b}\n", end=printEnd) for b in buffer]
+        [print(f"\r{b}{' ' * 100}\n", end=printEnd) for b in buffer]
         print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
         buffer.clear()
 
@@ -106,9 +108,9 @@ buffer = []
 
 for f in progressBar(files,
                      prefix="Progress:",
-                     suffix=f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}",
+                     # suffix=f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}",
                      length=50,
-                     printEnd="",
+                     # printEnd="",
                      buffer=buffer):
     other_file = dir2 + f[len(dir1):]
 
@@ -119,9 +121,9 @@ for f in progressBar(files,
             log_f.write(other_file)
 
     bytes_scanned += os.path.getsize(f)
+    suffix = f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}"
 
     time.sleep(1)
-
 if not mismatches:
     print("No mismatch found")
 else:
