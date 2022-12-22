@@ -123,7 +123,6 @@ for f in progressBar(files,
     bytes_scanned += os.path.getsize(f)
     suffix = f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}"
 
-    time.sleep(1)
 if not mismatches:
     print("No mismatch found")
 else:
