@@ -4,6 +4,19 @@ import os
 import sys
 import time
 
+import math
+
+bytes_scanned = 0
+
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
+
 
 def progressBar(iterable, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r", buffer=None):
     """
@@ -84,14 +97,19 @@ print(f"Getting files from {dir1}")
 files, total_size = get_files(dir1)
 i = 0
 
-print(f"Comparing {len(files)} files ({total_size/1024**3}GB)")
+print(f"Comparing {len(files)} files ({convert_size(total_size)})")
 mismatches = []
 
 if os.path.exists("mismatch.txt"):
     os.remove("mismatch.txt")
 buffer = []
 
-for f in progressBar(files, prefix='Progress:', suffix='Complete', length=50, printEnd="", buffer=buffer):
+for f in progressBar(files,
+                     prefix="Progress:",
+                     suffix=f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}",
+                     length=50,
+                     printEnd="",
+                     buffer=buffer):
     other_file = dir2 + f[len(dir1):]
 
     if not file_equals(f, other_file):
@@ -99,6 +117,10 @@ for f in progressBar(files, prefix='Progress:', suffix='Complete', length=50, pr
         with open(log_dir, "a") as log_f:
             buffer.append(other_file)
             log_f.write(other_file)
+
+    bytes_scanned += os.path.getsize(f)
+
+    time.sleep(1)
 
 if not mismatches:
     print("No mismatch found")
