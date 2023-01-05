@@ -2,7 +2,6 @@ import glob
 import hashlib
 import os
 import sys
-import time
 
 import math
 
@@ -93,7 +92,8 @@ if len(args) != 3:
 dir1 = args[1]
 dir2 = args[2]
 
-log_dir = "mismatch.txt"
+mismatches_file = "mismatch.txt"
+checked_file = "checked.txt"
 
 print(f"Getting files from {dir1}")
 files, total_size = get_files(dir1)
@@ -102,8 +102,9 @@ i = 0
 print(f"Comparing {len(files)} files ({convert_size(total_size)})")
 mismatches = []
 
-if os.path.exists("mismatch.txt"):
-    os.remove("mismatch.txt")
+if os.path.exists(mismatches_file):
+    os.remove(mismatches_file)
+
 buffer = []
 
 for f in progressBar(files,
@@ -115,10 +116,10 @@ for f in progressBar(files,
     other_file = dir2 + f[len(dir1):]
 
     if not file_equals(f, other_file):
-        mismatches.append(other_file)
-        with open(log_dir, "a") as log_f:
-            buffer.append(other_file)
-            log_f.write(other_file)
+        mismatches.append(f)
+        with open(mismatches_file, "a") as log_f:
+            buffer.append(f)
+            log_f.write(f + "\n")
 
     bytes_scanned += os.path.getsize(f)
     suffix = f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}"
