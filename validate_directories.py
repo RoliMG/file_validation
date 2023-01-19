@@ -65,10 +65,16 @@ def md5(fname):
 
 
 def file_equals(fname1, fname2, chunk_size=4096) -> bool:
-    with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
-        while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
-            if chunk1 != chunk2:
-                return False
+    try:
+        with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
+            while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
+                if chunk1 != chunk2:
+                    return False
+    except PermissionError:
+        buffer.append(f"Error accessing {fname1} or {fname2}")
+    except:
+        buffer.append(f"Error ocured during opening {fname1} or {fname2}")
+
     return True
 
 
@@ -76,10 +82,11 @@ def get_files(dir):
     files = []
     total_size = 0
 
-    for filename in glob.iglob(dir + '**/**', recursive=True):
-        if os.path.isfile(filename):
-            total_size += os.path.getsize(filename)
-            files.append(filename)
+    for root, subdir, filenames in os.walk(dir):
+        for filename in filenames:
+            full_path = os.path.join(root, filename)
+            total_size += os.path.getsize(full_path)
+            files.append(full_path)
 
     return files, total_size
 
@@ -93,7 +100,6 @@ dir1 = args[1]
 dir2 = args[2]
 
 mismatches_file = "mismatch.txt"
-checked_file = "checked.txt"
 
 print(f"Getting files from {dir1}")
 files, total_size = get_files(dir1)
