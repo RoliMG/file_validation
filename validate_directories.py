@@ -42,7 +42,7 @@ def progressBar(iterable, prefix='', decimals=1, length=100, fill='█', printEn
         filledLength = int(length * iteration // total)
         bar = fill * filledLength + '-' * (length - filledLength)
 
-        [print(f"\r{b}{' ' * 100}\n", end=printEnd) for b in buffer]
+        [print(f"\r{b}{' ' * 150}\n", end=printEnd) for b in buffer]
         print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
         buffer.clear()
 
@@ -70,10 +70,11 @@ def file_equals(fname1, fname2, chunk_size=4096) -> bool:
             while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
                 if chunk1 != chunk2:
                     return False
-    except PermissionError:
-        buffer.append(f"Error accessing {fname1} or {fname2}")
     except:
-        buffer.append(f"Error ocured during opening {fname1} or {fname2}")
+        buffer.append(f"Error occurred during opening {fname2}")
+        with open(corrupted_log_file, "a") as log_f:
+            buffer.append(fname2)
+            log_f.write(fname2 + "\n")
 
     return True
 
@@ -99,17 +100,17 @@ if len(args) != 3:
 dir1 = args[1]
 dir2 = args[2]
 
-mismatches_file = "mismatch.txt"
+corrupted_log_file = "mismatch.txt"
 
 print(f"Getting files from {dir1}")
 files, total_size = get_files(dir1)
 i = 0
 
 print(f"Comparing {len(files)} files ({convert_size(total_size)})")
-mismatches = []
+corrupted_count = 0
 
-if os.path.exists(mismatches_file):
-    os.remove(mismatches_file)
+if os.path.exists(corrupted_log_file):
+    os.remove(corrupted_log_file)
 
 buffer = []
 
@@ -122,15 +123,15 @@ for f in progressBar(files,
     other_file = dir2 + f[len(dir1):]
 
     if not file_equals(f, other_file):
-        mismatches.append(f)
-        with open(mismatches_file, "a") as log_f:
+        corrupted_count += 1
+        with open(corrupted_log_file, "a") as log_f:
             buffer.append(f)
             log_f.write(f + "\n")
 
     bytes_scanned += os.path.getsize(f)
     suffix = f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}"
 
-if not mismatches:
-    print("No mismatch found")
+if corrupted_count:
+    print("No corruption found")
 else:
-    print(f"{len(mismatches)} mismatches found")
+    print(f"{corrupted_count} corruptions found")
