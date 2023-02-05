@@ -70,13 +70,8 @@ def file_equals(fname1, fname2, chunk_size=4096) -> bool:
             while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
                 if chunk1 != chunk2:
                     return False
-    except:
-        # raise error here and handle at caller
-        buffer.append(f"Error opening {fname2}")
-
-        with open(corrupted_log_file, "a") as log_f:
-            buffer.append(fname2)
-            log_f.write(fname2 + "\n")
+    except IOError:
+        return False
 
     return True
 
