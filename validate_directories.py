@@ -64,16 +64,20 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-def file_equals(fname1, fname2, chunk_size=4096) -> bool:
+def file_equals(fname1: str, fname2: str, chunk_size: int = 4096) -> (bool, str):
+    hash_md5 = hashlib.md5()
+
     try:
         with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
             while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
-                if chunk1 != chunk2:
-                    return False
-    except IOError:
-        return False
+                hash_md5.update(chunk1)
 
-    return True
+                if chunk1 != chunk2:
+                    return False, ""
+    except IOError:
+        return False, ""
+
+    return True, hash_md5.hexdigest()
 
 
 def get_files(dir):
@@ -98,6 +102,7 @@ dir1 = args[1]
 dir2 = args[2]
 
 corrupted_log_file = "mismatch.txt"
+hash_file = "file_hashes.txt"
 
 print(f"Getting files from {dir1}")
 files, total_size = get_files(dir1)
@@ -118,8 +123,12 @@ for f in progressBar(files,
                      # printEnd="",
                      buffer=buffer):
     other_file = dir2 + f[len(dir1):]
+    equals, hash_md5 = file_equals(f, other_file)
 
-    if not file_equals(f, other_file):
+    if equals:
+        with open(hash_file, "a") as hash_file_handler:
+            hash_file_handler.write(f"{f[len(dir1):]}:{hash_md5}\n")
+    else:
         corrupted_count += 1
         with open(corrupted_log_file, "a") as log_f:
             buffer.append(f)
