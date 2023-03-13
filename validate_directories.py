@@ -2,22 +2,10 @@ import hashlib
 import os
 import sys
 
-import math
-
-from util import get_files, progressBar
+from util import get_files, convert_size
 
 suffix = "Complete"
 bytes_scanned = 0
-
-
-def convert_size(size_bytes):
-    if size_bytes == 0:
-        return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return f"{s} {size_name[i]}"
 
 
 def file_equals(fname1: str, fname2: str, chunk_size: int = 4096) -> (bool, str):

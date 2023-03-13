@@ -1,27 +1,48 @@
-import hashlib
+import os
 import sys
 
-from util import get_files, md5, progressBar
+import progressbar
+from progressbar import ProgressBar
+
+from util import get_files, md5, convert_size
 
 args = sys.argv
 
 if len(args) != 2:
     raise ValueError("Wrong number of args")
 
+SEPARATOR = ":"
 root_dir = args[1]
 
-files, _ = get_files(root_dir)
+files, total_size = get_files(root_dir)
 hash_file = "file_hashes.txt"
 
-for f in progressBar(files,
-                     prefix="Progress:",
-                     # suffix=f"Complete {convert_size(bytes_scanned)}/{convert_size(total_size)}",
-                     length=50,
-                     # printEnd="",
-                     buffer=None):
-    hash_md5 = md5(f)
-    rel_path = f[len(root_dir):]
-    path_hash = hashlib.md5(rel_path.encode("UTF-8"))
+if os.path.exists(hash_file):
+    os.remove(hash_file)
 
-    with open(hash_file, "a") as hf:
-        hf.write(f"{path_hash.hexdigest()} {hash_md5}\n")
+widgets = [
+    progressbar.Percentage(),
+    progressbar.Bar(),
+    ' [', progressbar.DataSize(), f'/{convert_size(total_size)}] ',
+    ' (', progressbar.ETA(), ') ',
+]
+
+pbar = ProgressBar(max_value=total_size, widgets=widgets)
+errors = []
+sum_size = 0
+
+for f in files:
+    hash_md5 = ""
+
+    try:
+        hash_md5 = md5(f)
+    except IOError:
+        errors.append(f"Cannot open file {f}")
+
+    rel_path = f[len(root_dir):]
+
+    sum_size += os.path.getsize(f)
+    pbar.update(sum_size)
+
+    with open(hash_file, "a", encoding="UTF-8") as hf:
+        hf.write(f"{rel_path}{SEPARATOR}{hash_md5}\n")

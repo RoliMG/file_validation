@@ -1,7 +1,6 @@
 import hashlib
+import math
 import os
-
-from validate_directories import suffix
 
 
 def get_files(dir: str):
@@ -17,7 +16,7 @@ def get_files(dir: str):
     return files, total_size
 
 
-def md5(fname):
+def md5(fname: str):
     hash_md5 = hashlib.md5()
     with open(fname, "rb") as f:
         for chunk in iter(lambda: f.read(4096), b""):
@@ -25,38 +24,11 @@ def md5(fname):
     return hash_md5.hexdigest()
 
 
-def progressBar(iterable, prefix='', decimals=1, length=100, fill='█', printEnd="\r", buffer=None):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iterable    - Required  : iterable object (Iterable)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    if buffer is None:
-        buffer = []
-
-    total = len(iterable)
-
-    # Progress Bar Printing Function
-    def printProgressBar(iteration):
-        percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-        filledLength = int(length * iteration // total)
-        bar = fill * filledLength + '-' * (length - filledLength)
-
-        [print(f"\r{b}{' ' * 150}\n", end=printEnd) for b in buffer]
-        print(f'\r{prefix} |{bar}| {percent}% {suffix}', end=printEnd)
-        buffer.clear()
-
-    # Initial Call
-    printProgressBar(0)
-    # Update Progress Bar
-    for i, item in enumerate(iterable):
-        yield item
-        printProgressBar(i + 1)
-    # Print New Line on Complete
-    print()
+def convert_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return f"{s} {size_name[i]}"
