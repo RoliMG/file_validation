@@ -1,6 +1,7 @@
 import hashlib
 import sys
-from pathlib import Path
+
+from util import get_files, md5
 
 args = sys.argv
 
@@ -10,19 +11,24 @@ if len(args) != 3:
 root_dir = args[1]
 hash_file = args[2]
 
-file_hashes: dict[Path, str] = dict()
+file_hashes: dict[str, str] = dict()
 
 with open(hash_file, "r") as f:
-    line = f.readline()
-    separator_index = line.index(":")
-    file_full_path = Path(f"{root_dir}/{line[:separator_index]}")
-    file_hashes[file_full_path] = line[separator_index+1:len(line)-1]
+    while line := f.readline():
+        separator_index = line.index(" ")
+        file_path_hash = line[:separator_index]
+        file_hashes[file_path_hash] = line[separator_index + 1:len(line) - 1]
 
-for (path, file_hash) in file_hashes.items():
-    hash_md5 = hashlib.md5()
+files, _ = get_files(root_dir)
 
-    with open(path, "rb") as f:
-        hash_md5.update(f.read(4096))
+for f in files:
+    rel_path = f[len(root_dir):]
+    path_hash = hashlib.md5(rel_path.encode("UTF-8")).hexdigest()
+    data_hash = md5(f)
 
-    if file_hash != hash_md5.hexdigest():
-        print(f"Files not equal {path}")
+    if path_hash not in file_hashes.keys():
+        print(f"{f} not found in hash file")
+
+    if file_hashes[path_hash] != data_hash:
+        print(f"Hash mismatch {f}")
+
