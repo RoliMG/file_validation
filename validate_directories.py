@@ -47,7 +47,7 @@ hash_file = "file_hashes.txt"
 if os.path.exists(hash_file):
     os.remove(hash_file)
 
-logging.info(f"Getting files from {dir1}")
+logging.info("Getting file list")
 files, total_size = get_files(dir1)
 
 widgets = [

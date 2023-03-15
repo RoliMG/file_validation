@@ -1,8 +1,7 @@
 import time
 import progressbar
+from progressbar import ProgressBar
 
-bar = progressbar.ProgressBar(redirect_stdout=True)
-for i in range(100):
-    print('Some text', i)
-    time.sleep(0.1)
-    bar.update(i)
+from util import get_files
+
+f, s = get_files("C:/Users/Roli/Downloads/advanced_renamer_portable_3_88_1")

@@ -38,7 +38,7 @@ try:
 except IOError:
     logging.error(f"Could not open {hash_file}")
 
-logging.info("Getting file list...")
+logging.info("Getting file list")
 files, total_size = get_files(root_dir)
 
 widgets = [
@@ -52,6 +52,7 @@ pbar = ProgressBar(max_value=total_size, widgets=widgets)
 bytes_scanned = 0
 mismatch = 0
 
+logging.info(f"Checking Hashes for {len(files)} files")
 for f in files:
     rel_path = f[len(root_dir):]
     data_hash = md5(f)

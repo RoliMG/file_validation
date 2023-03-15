@@ -1,17 +1,24 @@
 import hashlib
 import math
 import os
+import time
+
+import progressbar
+from progressbar import ProgressBar
 
 
 def get_files(dir: str):
     files = []
     total_size = 0
 
+    pbar = ProgressBar(max_value=progressbar.UnknownLength)
+
     for root, subdir, filenames in os.walk(dir):
         for filename in filenames:
             full_path = os.path.join(root, filename)
             total_size += os.path.getsize(full_path)
             files.append(full_path)
+            pbar.update()
 
     return files, total_size
 

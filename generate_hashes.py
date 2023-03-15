@@ -24,7 +24,7 @@ logging.basicConfig(encoding='utf-8',
 SEPARATOR = ":"
 root_dir = args[1]
 
-logging.info("Getting file list...")
+logging.info("Getting file list")
 files, total_size = get_files(root_dir)
 hash_file = "file_hashes.txt"
 
@@ -42,6 +42,7 @@ pbar = ProgressBar(max_value=total_size, widgets=widgets)
 bytes_scanned = 0
 open_errors = 0
 
+logging.info(f"Generating hashes for {len(files)} files")
 for f in files:
     hash_md5 = ""
 
