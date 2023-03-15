@@ -38,6 +38,7 @@ try:
 except IOError:
     logging.error(f"Could not open {hash_file}")
 
+logging.info("Getting file list...")
 files, total_size = get_files(root_dir)
 
 widgets = [

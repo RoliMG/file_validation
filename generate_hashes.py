@@ -14,7 +14,7 @@ if len(args) != 2:
 
 progressbar.streams.wrap_stderr()
 logging.basicConfig(encoding='utf-8',
-                    level=logging.WARNING,
+                    level=logging.INFO,
                     # filemode="w",
                     handlers=[
                         logging.FileHandler("logs/generate_hashes.log"),
@@ -24,6 +24,7 @@ logging.basicConfig(encoding='utf-8',
 SEPARATOR = ":"
 root_dir = args[1]
 
+logging.info("Getting file list...")
 files, total_size = get_files(root_dir)
 hash_file = "file_hashes.txt"
 
