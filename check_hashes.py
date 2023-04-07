@@ -6,7 +6,7 @@ import sys
 import progressbar
 from progressbar import ProgressBar
 
-from util import get_files, md5, convert_size
+from util import get_files, md5, convert_size, PREFIXES
 
 args = sys.argv
 
@@ -44,7 +44,7 @@ files, total_size = get_files(root_dir)
 widgets = [
     progressbar.Percentage(),
     progressbar.Bar(),
-    ' [', progressbar.DataSize(prefixes=('', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')), f'/{convert_size(total_size)}] ',
+    ' [', progressbar.DataSize(prefixes=PREFIXES), f'/{convert_size(total_size)}] ',
     ' (', progressbar.ETA(), ') ',
 ]
 

@@ -5,7 +5,7 @@ import sys
 import progressbar
 from progressbar import ProgressBar
 
-from util import get_files, md5, convert_size
+from util import get_files, md5, convert_size, PREFIXES
 
 args = sys.argv
 
@@ -24,7 +24,7 @@ logging.basicConfig(encoding='utf-8',
 SEPARATOR = ":"
 root_dir = args[1]
 
-logging.info("Getting file list")
+logging.info("Scanning for files")
 files, total_size = get_files(root_dir)
 hash_file = "file_hashes.txt"
 
@@ -34,7 +34,7 @@ if os.path.exists(hash_file):
 widgets = [
     progressbar.Percentage(),
     progressbar.Bar(),
-    ' [', progressbar.DataSize(prefixes=('', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')), f'/{convert_size(total_size)}] ',
+    ' [', progressbar.DataSize(prefixes=PREFIXES), f'/{convert_size(total_size)}] ',
     ' (', progressbar.ETA(), ') ',
 ]
 

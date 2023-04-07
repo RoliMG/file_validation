@@ -1,11 +1,11 @@
 import hashlib
 import math
 import os
-import time
 
 import progressbar
 from progressbar import ProgressBar
 
+PREFIXES = ('', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
 
 def get_files(dir: str):
     files = []
@@ -34,8 +34,8 @@ def md5(fname: str):
 def convert_size(size_bytes):
     if size_bytes == 0:
         return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
-    return f"{s} {size_name[i]}"
+    return f"{s} {PREFIXES[i]}B"

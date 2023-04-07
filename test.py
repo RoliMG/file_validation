@@ -1,7 +1,12 @@
+import argparse
 import time
 import progressbar
 from progressbar import ProgressBar
 
-from util import get_files
 
-f, s = get_files("C:/Users/Roli/Downloads/advanced_renamer_portable_3_88_1")
+parser = argparse.ArgumentParser(description="Generate hashes for all files in a directory recursively.")
+parser.add_argument("-d", type=str, help="The directory to be scanned.")
+parser.add_argument("-h", type=str, help="The file containing the hash values.")
+
+args = parser.parse_args()
+print(args.d)
