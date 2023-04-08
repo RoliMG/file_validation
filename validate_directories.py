@@ -1,32 +1,28 @@
-import glob
 import hashlib
+import logging
 import os
 import sys
 
+import progressbar
+from progressbar import ProgressBar
 
-def md5(fname):
+from util import get_files, convert_size
+
+
+def file_equals(fname1: str, fname2: str, chunk_size: int = 4096) -> (bool, str):
     hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
 
+    try:
+        with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
+            while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
+                hash_md5.update(chunk1)
 
-def files_equals(fname1, fname2, chunk_size=4096) -> bool:
-    with open(fname1, "rb") as f1, open(fname2, "rb") as f2:
-        while (chunk1 := f1.read(chunk_size)) and (chunk2 := f2.read(chunk_size)):
-            if chunk1 != chunk2:
-                return False
-    return True
+                if chunk1 != chunk2:
+                    return False, ""
+    except IOError:
+        return False, ""
 
-
-def get_files(dir):
-    files = []
-    for filename in glob.iglob(dir + '**/**', recursive=True):
-        if os.path.isfile(filename):
-            files.append(filename)
-
-    return files
+    return True, hash_md5.hexdigest()
 
 
 args = sys.argv
@@ -34,37 +30,51 @@ args = sys.argv
 if len(args) != 3:
     raise ValueError("Wrong number of args")
 
+progressbar.streams.wrap_stderr()
+logging.basicConfig(encoding='utf-8',
+                    level=logging.INFO,
+                    # filemode="w",
+                    handlers=[
+                        logging.FileHandler("logs/validate_directories.log"),
+                        logging.StreamHandler()
+                    ])
+
 dir1 = args[1]
 dir2 = args[2]
 
-log_dir = "mismatch.txt"
+hash_file = "file_hashes.txt"
 
-print(f"Getting files from {dir1}")
-files = get_files(dir1)
-i = 0
+if os.path.exists(hash_file):
+    os.remove(hash_file)
 
-print("Comparing hashes")
-mismatch = 0
+logging.info("Scanning for files")
+files, total_size = get_files(dir1)
 
-if os.path.exists("mismatch.txt"):
-    os.remove("mismatch.txt")
+widgets = [
+    progressbar.Percentage(),
+    progressbar.Bar(),
+    ' [', progressbar.DataSize(prefixes=('', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')), f'/{convert_size(total_size)}] ',
+    ' (', progressbar.ETA(), ') ',
+]
+
+pbar = ProgressBar(max_value=total_size, widgets=widgets)
+bytes_scanned = 0
+
+logging.info(f"Comparing {len(files)} files ({convert_size(total_size)})")
+corrupted_count = 0
 
 for f in files:
-    if i % 100 == 0:
-        print(f"{i}/{len(files)}")
-
     other_file = dir2 + f[len(dir1):]
+    equals, hash_md5 = file_equals(f, other_file)
 
-    if not files_equals(f, other_file):
-        mismatch += 1
-        with open(log_dir, "a") as log_f:
-            msg = f"{dir2[0]}{f[1:]}\n"
-            print(msg)
-            log_f.write(msg)
+    if equals:
+        with open(hash_file, "a") as hash_file_handler:
+            hash_file_handler.write(f"{f[len(dir1):]}:{hash_md5}\n")
+    else:
+        corrupted_count += 1
+        logging.warning(f"Mismatch found for {f}")
 
-    i += 1
+    bytes_scanned += os.path.getsize(f)
+    pbar.update(bytes_scanned)
 
-if mismatch == 0:
-    print("No mismatch found")
-else:
-    print(f"{mismatch} mismatches found")
+logging.info(f"Corruptions found {corrupted_count}")
