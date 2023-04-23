@@ -7,6 +7,7 @@ from progressbar import ProgressBar
 
 PREFIXES = ('', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
 
+
 def get_files(dir: str):
     files = []
     total_size = 0
