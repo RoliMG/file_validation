@@ -1,12 +1,11 @@
 import argparse
 import time
+
 import progressbar
 from progressbar import ProgressBar
 
+pbar = ProgressBar(max_value=100)
 
-parser = argparse.ArgumentParser(description="Generate hashes for all files in a directory recursively.")
-parser.add_argument("-d", type=str, help="The directory to be scanned.")
-parser.add_argument("-h", type=str, help="The file containing the hash values.")
-
-args = parser.parse_args()
-print(args.d)
+for i in range(100):
+    pbar.update(i)
+    time.sleep(1)
