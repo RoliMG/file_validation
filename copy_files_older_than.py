@@ -22,22 +22,9 @@ def is_video(file):
 
 def is_image(file):
     types = {'.heic', '.ras', '.xwd', '.bmp', '.jpe', '.jpg', '.jpeg', '.xpm', '.ief', '.pbm', '.tif', '.gif', '.ppm',
-             '.xbm', '.tiff', '.rgb', '.pgm', '.png', '.pnm'}
+             '.xbm', '.tiff', '.rgb', '.pgm', '.png', '.pnm', '.dng'}
     _, ext = os.path.splitext(file)
-    return ext in types
-
-
-def get_time(file: str) -> int:
-    with open(file, 'rb') as image_file:
-        try:
-            img = Image(image_file)
-        except:
-            return int(os.path.getmtime(file))
-
-    if not is_image(file) or not is_video(file) or not img.has_exif or 'datetime' not in img.list_all():
-        return int(os.path.getmtime(file))
-
-    return int(mktime(datetime.strptime(img.datetime, "%Y:%m:%d %H:%M:%S").timetuple()))
+    return ext.lower() in types
 
 
 progressbar.streams.wrap_stderr()
@@ -49,8 +36,8 @@ logging.basicConfig(encoding='utf-8',
                         logging.StreamHandler()
                     ])
 
-time = 1671205474
-src = "Y:/Photos/DCIM"
+time = 1670743912
+src = "Y:/Photos"
 dest = "D:/nas_bilder"
 
 logging.info("Scanning files")
@@ -60,7 +47,8 @@ dates: list[tuple[int, str]] = []
 logging.info("Retrieving timestamp from files")
 
 for f in files:
-    dates.append((get_time(f), f))
+    if is_image(f) or is_video(f):
+        dates.append((int(os.path.getmtime(f)), f))
 
 most_recent = [f[1] for f in dates if f[0] > time]
 
