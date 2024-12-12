@@ -1,9 +1,6 @@
 import logging
-from datetime import datetime
-from time import mktime
 
 import progressbar
-from exif import Image
 from progressbar import ProgressBar
 
 from util import get_files
