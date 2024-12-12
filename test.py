@@ -2,8 +2,6 @@ import os
 import time
 from datetime import datetime
 
-from exif import Image
-
 
 def get_date(file: str) -> int:
     with open(file, 'rb') as image_file:
