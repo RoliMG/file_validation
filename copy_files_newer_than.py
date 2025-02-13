@@ -33,9 +33,9 @@ logging.basicConfig(encoding='utf-8',
                         logging.StreamHandler()
                     ])
 
-time = 1670743912
-src = "Y:/Photos"
-dest = "D:/nas_bilder"
+time = 1701115806
+src = "Z:/gabi/Photos"
+dest = "E:/nas_bilder"
 
 logging.info("Scanning files")
 files, _ = get_files(src)
